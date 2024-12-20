@@ -4,6 +4,7 @@ import requests
 configs = load_configs()
 
 def register() -> dict:
+    """Registers for the backend challenge"""
     url = configs.get('BASE_URL') + "/api/v1/register"
     payload = {
         "email": configs.get("EMAIL"),

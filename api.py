@@ -1,37 +1,45 @@
 from fastapi import FastAPI, Query, HTTPException
-from typing import List, Optional
-import json 
-
-DATA = "data.json"
+from typing import Optional, Literal
+from util import parse_categories
 
 app = FastAPI()
 
-def load_data() -> dict:
-    return json.load(DATA)
-    
-
-@app.get("/books", response_model=List[dict])
-async def get_books(
-    title: Optional[str] = Query(None, description="Filter by book title"),
-    author: Optional[str] = Query(None, description="Filter by author name"),
-    year: Optional[int] = Query(None, description="Filter by publication year"),
+@app.get("/products", response_model=list[dict])
+async def get_products(
+    sort: Optional[Literal["name", "price", "stars"]] = Query("name", description="Sort by field"),
+    order: Optional[Literal["asc", "desc"]] = Query("asc", description="Sort order"),
+    categories: Optional[list[Literal[
+        "electronics", "apparel", "home goods", "sports", "beauty", "grocery", 
+    "office supplies", "outdoor", "toys", "health", "automotive", "luxury", "books"]]] = Query(None, description="Filter by one or more categories"),
+    offset: Optional[int] = Query(0, description="Number of pages of size limit to skip"),
+    limit: Optional[int] = Query(3, description="Maximum number of items to return"),
+    price_min: Optional[int] = Query(0, description="Minimum price in cents"),
+    price_max: Optional[int] = Query(4294967295, description="Maximum price in cents"),
+    star_min: Optional[int] = Query(0, description="Minimum star rating, in 0.01 stars"),
+    star_max: Optional[int] = Query(500, description="Maximum star rating, in 0.01 stars"),
 ):
     """
-    Get a list of books with optional filters for title, author, and year.
+    Fetches a list of products based on specified attributes
     """
-    filtered_books = books
-
-    if title:
-        filtered_books = [book for book in filtered_books if title.lower() in book["title"].lower()]
-    if author:
-        filtered_books = [book for book in filtered_books if author.lower() in book["author"].lower()]
-    if year:
-        filtered_books = [book for book in filtered_books if book["year"] == year]
-
-    if not filtered_books:
-        raise HTTPException(status_code=404, detail="No books found matching the criteria.")
-
-    return filtered_books
+    
+    # parse the data
+    filter_categories = set(parse_categories(categories))
+    ascending = True if order == "asc" else False
+    
+    data = load_data()
+    
+    # first, we filter everything as needed 
+    price_filtered = data[(data['price'] >= price_min) & (data['price'] <= price_max)]
+    star_filtered = price_filtered[(price_filtered['stars'] >= star_min) & (price_filtered['stars'] <= star_max)]
+    category_filtered = star_filtered[star_filtered['categories'].apply(lambda categories: set(categories).intersection(filter_categories))]
+    
+    # then, we sort by the order given
+    sorted = category_filtered.sort_values(by=sort, ascending=ascending)
+    
+    # finally, do offset and limit 
+    offset_limited = sorted.iloc[offset:offset+limit]
+    
+    return 
 
 if __name__ == "__main__":
     data = load_data()
