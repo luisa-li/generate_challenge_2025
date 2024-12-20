@@ -26,7 +26,7 @@ def prods_to_list(df: pd.DataFrame) -> list[dict]:
             "id": row["id"],
             "name": row["name"],
             "categories": row["categories"],
+            "stars": row["stars"],
             "price": row["price"],
-            "stars": row["stars"]
         })
     return result
