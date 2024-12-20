@@ -22,16 +22,15 @@ def submit(link: str):
     url = configs.get('BASE_URL') + f"/api/v1/{configs.get('TOKEN')}/submit"
     payload = {"url": link}
     response = requests.post(url, json=payload)
-    breakpoint()
     if response.status_code == 201:
         print("Sucessfully scored.")
         print(response.json())
     else:
         print("Scoring unsuccessful.")
-        breakpoint()
 
 if __name__ == "__main__":
     health = requests.get(f"{configs.get('BASE_URL')}/api/v1/health")
-    link = "https://ad75-2800-200-e6f0-e60-61b6-48f0-fc6-9132.ngrok-free.app"
+    link = "https://0c5e-2800-200-e6f0-e60-61b6-48f0-fc6-9132.ngrok-free.app"
     submit(link)
+    # {'score': 0, 'message': 'solution scored'}
     
