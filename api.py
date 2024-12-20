@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query
 from typing import Optional, Literal
-from util import parse_categories
+from util import parse_categories, load_data, prods_to_list
 
 app = FastAPI()
 
@@ -39,8 +39,7 @@ async def get_products(
     # finally, do offset and limit 
     offset_limited = sorted.iloc[offset:offset+limit]
     
-    return 
+    return prods_to_list(offset_limited)
 
 if __name__ == "__main__":
     data = load_data()
-    breakpoint()

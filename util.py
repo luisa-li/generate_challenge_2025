@@ -17,3 +17,16 @@ def load_data() -> pd.DataFrame:
     data = pd.read_json(DATA, orient='index')
     # reset index gets rid of the double indexing that happens 
     return data.reset_index(drop=True) 
+
+def prods_to_list(df: pd.DataFrame) -> list[dict]:
+    """Takes the filtered and ordered dataframe and produces a list of dictionary as output"""
+    result = []
+    for _, row in df.iterrows():
+        result.append({
+            "id": row["id"],
+            "name": row["name"],
+            "categories": row["categories"],
+            "price": row["price"],
+            "stars": row["stars"]
+        })
+    return result
